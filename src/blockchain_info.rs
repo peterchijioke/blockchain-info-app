@@ -1,14 +1,11 @@
 use dotenv;
-
-use crate::blockchain_address::BlockchainAddress;
-use crate::blockchain_status::BlockchainStatus;
-use crate::blockchain_transactions::BlockchainTransaction;
-
 use reqwest;
-use serde::Result;
+// use serde_json::Result;
 use tokio;
 
-const HOST_URL: &str = "https://btcbook.nownodes.io/api";
+use crate::{blockchain_address::BlockchainAddress, blockchain_status::BlockchainStatus};
+
+const HOST_URL: &str = "https://btcbook.nownodes.io/api/";
 
 #[tokio::main]
 pub async fn send_request(url: &str) -> String {
@@ -25,4 +22,13 @@ pub async fn send_request(url: &str) -> String {
         .text()
         .await
         .expect("Failed to convert the json");
+}
+
+pub fn send_status_request() -> BlockchainStatus {
+    let response = send_request(&HOST_URL);
+    serde_json::from_str(&response).expect("Failed to deserialize from json")
+}
+pub fn send_address_request(address: &str) -> BlockchainAddress {
+    let response = send_request(&[HOST_URL, "/v2/address/", address].join(""));
+    serde_json::from_str(&response).expect("Failed to deserialize from json")
 }
